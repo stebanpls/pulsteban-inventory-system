@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="es" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Usuarios</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <!-- Enlace a nuestra hoja de estilos personalizada -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  </head>
+  <body>
+    <div class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+        ></button>
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2>Gestión de Usuarios</h2>
+          <p class="text-muted">
+            Bienvenido, {{ current_user.fullname }} ({{ current_user.role }})
+          </p>
+        </div>
+        <div>
+          {% if current_user.role == 'Administrador' %}
+          <a href="{{ url_for('dashboard') }}" class="btn btn-primary"
+            >Ver Dashboard</a
+          >
+          {% endif %}
+          <a href="{{ url_for('auditoria') }}" class="btn btn-info"
+            >Ver Auditoría</a
+          >
+          <a href="{{ url_for('logout') }}" class="btn btn-danger"
+            >Cerrar Sesión</a
+          >
+        </div>
+      </div>
+
+      {% if current_user.role == 'Administrador' %}
+      <div class="card mb-4 shadow-sm bg-dark border-secondary">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0">Agregar Nuevo Usuario</h5>
+        </div>
+        <div class="card-body">
+          <form
+            action="{{ url_for('create_user') }}"
+            method="POST"
+            class="row g-3"
+          >
+            <div class="col-md-2">
+              <label class="form-label">Usuario</label>
+              <input
+                type="text"
+                name="username"
+                class="form-control"
+                required
+              />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Nombre Completo</label>
+              <input
+                type="text"
+                name="fullname"
+                class="form-control"
+                required
+              />
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Correo Electrónico</label>
+              <input type="email" name="email" class="form-control" required />
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Contraseña</label>
+              <input
+                type="password"
+                name="password"
+                class="form-control"
+                required
+              />
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Rol</label>
+              <select name="role" class="form-select" required>
+                <option value="Administrador">Administrador</option>
+                <option value="Bodeguero">Bodeguero</option>
+              </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+              <button type="submit" class="btn btn-success w-100">Crear</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="card shadow-sm bg-dark border-secondary">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0">Usuarios Registrados</h5>
+        </div>
+        <div class="card-body p-0">
+          <table
+            class="table table-dark table-hover table-striped mb-0 align-middle"
+          >
+            <thead class="thead-light">
+              <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Nombre Completo</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+              <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.fullname }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                  <span class="badge bg-info text-dark">{{ user.role }}</span>
+                </td>
+                <td class="text-center">
+                  {% if current_user.role == 'Administrador' %}
+                  <button
+                    class="btn btn-sm btn-warning"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalEditar{{ user.id }}"
+                  >
+                    Editar
+                  </button>
+                  <a
+                    href="{{ url_for('delete_user', user_id=user.id) }}"
+                    class="btn btn-sm btn-danger"
+                    onclick="return confirm('¿Seguro que deseas eliminar a {{ user.fullname }}?')"
+                    >Eliminar</a
+                  >
+                  {% else %}
+                  <span class="text-muted">Sin acciones</span>
+                  {% endif %}
+                </td>
+              </tr>
+
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Modales de Edición (FUERA DE LA TABLA) -->
+      {% for user in users %}
+      <div
+        class="modal fade"
+        id="modalEditar{{ user.id }}"
+        tabindex="-1"
+        data-bs-theme="dark"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form
+              action="{{ url_for('update_user', user_id=user.id) }}"
+              method="POST"
+            >
+              <div class="modal-header">
+                <h5 class="modal-title">Editar Usuario #{{ user.id }}</h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label class="form-label">Nombre Completo</label>
+                  <input
+                    type="text"
+                    name="fullname"
+                    class="form-control"
+                    value="{{ user.fullname }}"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Correo</label>
+                  <input
+                    type="email"
+                    name="email"
+                    class="form-control"
+                    value="{{ user.email }}"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Rol</label>
+                  <select name="role" class="form-select" required>
+                    <option value="Administrador" {{ 'selected' if user.role == 'Administrador' else '' }}>
+                      Administrador
+                    </option>
+                    <option value="Bodeguero" {{ 'selected' if user.role == 'Bodeguero' else '' }}>
+                      Bodeguero
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  Actualizar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

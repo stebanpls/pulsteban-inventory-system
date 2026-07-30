@@ -1,0 +1,22 @@
+body {
+  background-color: #212529; /* Fondo oscuro */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #f8f9fa; /* Texto por defecto claro */
+}
+
+.login-container {
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-card {
+  background-color: #343a40; /* Tarjeta en gris oscuro */
+  color: #f8f9fa; /* Texto claro dentro de la tarjeta */
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid #495057; /* Borde sutil */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); /* Sombra más pronunciada */
+}

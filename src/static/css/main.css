@@ -1,0 +1,11 @@
+/* Estilos generales para el cuerpo de la página */
+body {
+  background-color: #212529; /* Equivalente a bg-dark de Bootstrap */
+  color: #f8f9fa; /* Equivalente a text-white de Bootstrap */
+  padding: 1.5rem; /* Equivalente a p-4 de Bootstrap */
+}
+
+/* Estilo específico para el gráfico del dashboard */
+#usersByRoleChart {
+  max-height: 300px;
+}

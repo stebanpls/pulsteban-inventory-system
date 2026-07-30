@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auditoría del Sistema</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <!-- Enlace a nuestra hoja de estilos personalizada -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Registro de Auditoría</h2>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-light"
+          >← Volver al Inicio</a
+        >
+      </div>
+
+      <div class="card shadow-sm bg-dark border-secondary">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0">Eventos del Sistema</h5>
+        </div>
+        <div class="card-body p-0">
+          <table
+            class="table table-dark table-hover table-striped mb-0 align-middle"
+          >
+            <thead class="thead-light">
+              <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Acción</th>
+                <th>Tabla</th>
+                <th>Datos Anteriores (JSON)</th>
+                <th>Datos Nuevos (JSON)</th>
+                <th>Fecha / Hora</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for registro in registros %}
+              <tr>
+                <td>{{ registro.id }}</td>
+                <td>
+                  <span class="badge bg-primary">{{ registro.user_name }}</span>
+                </td>
+                <td>
+                  {% if registro.action == 'INSERT' %}
+                  <span class="badge bg-success">INSERT</span>
+                  {% elif registro.action == 'UPDATE' %}
+                  <span class="badge bg-warning text-dark">UPDATE</span>
+                  {% elif registro.action == 'DEACTIVATE' %}
+                  <span class="badge bg-secondary">DEACTIVATE</span>
+                  {% else %}
+                  <span class="badge bg-danger">DELETE</span>
+                  {% endif %}
+                </td>
+                <td><code>{{ registro.table_name }}</code></td>
+                <td>
+                  <pre
+                    class="mb-0"
+                  ><small>{{ registro.old_data if registro.old_data else '-' }}</small></pre>
+                </td>
+                <td>
+                  <pre
+                    class="mb-0"
+                  ><small>{{ registro.new_data if registro.new_data else '-' }}</small></pre>
+                </td>
+                <td>{{ registro.created_at }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="7" class="text-center">
+                  No hay registros de auditoría guardados.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
