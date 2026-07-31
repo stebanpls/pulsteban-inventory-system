@@ -9,3 +9,8 @@ body {
 #usersByRoleChart {
   max-height: 300px;
 }
+
+/* Asegura que el contenido preformateado se ajuste y no desborde la tabla */
+pre {
+  white-space: pre-wrap; /* Permite que el texto se ajuste */
+}

@@ -252,25 +252,28 @@ def delete_user(user_id):
     with conn.cursor() as cursor:
         # Obtenemos los datos viejos para la auditoría
         cursor.execute(
-            "SELECT id, username, fullname, email, role, is_active FROM user WHERE id = %s;",
+            "SELECT id, username, fullname, email, role FROM user WHERE id = %s;",
             (user_id,),
         )
         old_data = cursor.fetchone()
 
-        # En lugar de eliminar, desactivamos el usuario
-        cursor.execute("UPDATE user SET is_active = FALSE WHERE id = %s;", (user_id,))
+        # Eliminamos permanentemente al usuario
+        cursor.execute("DELETE FROM user WHERE id = %s;", (user_id,))
     conn.commit()
     conn.close()
 
     registrar_auditoria(
-        "DEACTIVATE",  # Usamos una nueva acción para ser más claros
+        "DELETE",
         "user",
         user_id,
         datos_viejos=old_data,
         datos_nuevos=None,
     )
 
-    flash(f"El usuario '{old_data['username']}' ha sido desactivado.", "success")
+    flash(
+        f"El usuario '{old_data['username']}' ha sido eliminado permanentemente.",
+        "success",
+    )
     return redirect(url_for("index"))
 
 
